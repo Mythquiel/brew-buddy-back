@@ -2,7 +2,6 @@ CREATE TABLE IF NOT EXISTS beverage (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   type beverage_type NOT NULL,          -- TEA / COFFEE
   name TEXT NOT NULL,
-  tea_category tea_type,                -- np. BLACK, GREEN...
   brew_time_min_sec SMALLINT,
   brew_time_max_sec SMALLINT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -14,12 +13,6 @@ CREATE TABLE IF NOT EXISTS beverage (
       OR (brew_time_min_sec IS NOT NULL AND brew_time_max_sec IS NOT NULL
           AND brew_time_min_sec >= 0
           AND brew_time_max_sec >= brew_time_min_sec)
-    ),
-
-  CONSTRAINT chk_tea_category_for_tea
-    CHECK (
-      (type = 'TEA' AND tea_category IS NOT NULL)
-      OR (type = 'COFFEE' AND tea_category IS NULL)
     )
 );
 
