@@ -1,7 +1,11 @@
+--liquibase formatted sql
+--changeset magda:003-schema.sql
+
 CREATE TABLE IF NOT EXISTS beverage (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  type beverage_type NOT NULL,          -- TEA / COFFEE
+  type beverage_type NOT NULL,
   name TEXT NOT NULL,
+  brand TEXT,
   brew_time_min_sec SMALLINT,
   brew_time_max_sec SMALLINT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -44,3 +48,12 @@ CREATE TABLE IF NOT EXISTS brew_log (
 CREATE INDEX IF NOT EXISTS idx_brew_log_beverage ON brew_log(beverage_id);
 CREATE INDEX IF NOT EXISTS idx_brew_log_brewed_at ON brew_log(brewed_at DESC);
 CREATE INDEX IF NOT EXISTS idx_beverage_name ON beverage((lower(name)));
+
+--rollback DROP INDEX IF EXISTS idx_beverage_name;
+--rollback DROP INDEX IF EXISTS idx_brew_log_brewed_at;
+--rollback DROP INDEX IF EXISTS idx_brew_log_beverage;
+--rollback DROP TABLE IF EXISTS brew_log;
+--rollback DROP TABLE IF EXISTS beverage_tag;
+--rollback DROP TABLE IF EXISTS tag;
+--rollback DROP TABLE IF EXISTS beverage_quantity;
+--rollback DROP TABLE IF EXISTS beverage;
