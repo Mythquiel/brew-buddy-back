@@ -1,29 +1,78 @@
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.5.7'
-	id 'io.spring.dependency-management' version '1.1.7'
+    id 'java'
+    id 'org.springframework.boot' version '3.5.7'
+    id 'io.spring.dependency-management' version '1.1.7'
 }
 
-group = 'com.example'
-version = '0.0.1-SNAPSHOT'
-description = 'Demo project for Spring Boot'
+repositories { mavenCentral() }
 
-java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(25)
-	}
-}
-
-repositories {
-	mavenCentral()
+configurations {
+    liquibaseRuntime
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    implementation 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    implementation 'org.mapstruct:mapstruct:1.5.5.Final'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.postgresql:postgresql:42.7.3'
+
+    liquibaseRuntime 'org.liquibase:liquibase-core:4.28.0'
+    liquibaseRuntime 'org.liquibase:liquibase-groovy-dsl:3.0.2'
+    liquibaseRuntime 'org.postgresql:postgresql:42.7.3'
+    liquibaseRuntime 'org.apache.commons:commons-lang3:3.18.0'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
-tasks.named('test') {
-	useJUnitPlatform()
+tasks.named('test') { useJUnitPlatform() }
+
+
+def liquibaseMainClass = 'liquibase.integration.commandline.Main'
+def lbWorkingDir = projectDir
+
+tasks.register('liquibaseUpdate', JavaExec) {
+    group = 'liquibase'
+    description = 'Run Liquibase update'
+    classpath = configurations.liquibaseRuntime
+    mainClass = liquibaseMainClass
+    workingDir = lbWorkingDir
+    args 'update'
+}
+
+tasks.register('liquibaseUpdateSQL', JavaExec) {
+    group = 'liquibase'
+    description = 'Generate SQL for update (no DB changes)'
+    classpath = configurations.liquibaseRuntime
+    mainClass = liquibaseMainClass
+    workingDir = lbWorkingDir
+    args 'updateSQL'
+}
+
+tasks.register('liquibaseStatus', JavaExec) {
+    group = 'liquibase'
+    description = 'Show pending changesets'
+    classpath = configurations.liquibaseRuntime
+    mainClass = liquibaseMainClass
+    workingDir = lbWorkingDir
+    args 'status'
+}
+
+tasks.register('liquibaseRollback', JavaExec) {
+    group = 'liquibase'
+    description = 'Rollback to a tag'
+    classpath = configurations.liquibaseRuntime
+    mainClass = liquibaseMainClass
+    workingDir = lbWorkingDir
+    doFirst {
+        if (!project.hasProperty('tag')) {
+            throw new GradleException("Provide -Ptag=<TAG>")
+        }
+    }
+    args 'rollback', project.property('tag')
 }
