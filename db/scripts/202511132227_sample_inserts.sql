@@ -18,25 +18,25 @@ SELECT 'COFFEE', 'Cappuccino', 'Illy'
 WHERE NOT EXISTS (SELECT 1 FROM beverage WHERE name = 'Cappuccino');
 
 
-INSERT INTO beverage_quantity (beverage_id, quantity_grams)
+INSERT INTO beverage_quantity (beverage_id, quantity)
 SELECT b.id, 250
 FROM beverage b
 WHERE b.name = 'Earl Grey'
   AND NOT EXISTS (SELECT 1 FROM beverage_quantity q WHERE q.beverage_id = b.id);
 
-INSERT INTO beverage_quantity (beverage_id, quantity_grams)
+INSERT INTO beverage_quantity (beverage_id, quantity)
 SELECT b.id, 200
 FROM beverage b
 WHERE b.name = 'Sencha'
   AND NOT EXISTS (SELECT 1 FROM beverage_quantity q WHERE q.beverage_id = b.id);
 
-INSERT INTO beverage_quantity (beverage_id, quantity_grams)
+INSERT INTO beverage_quantity (beverage_id, quantity)
 SELECT b.id, 500
 FROM beverage b
 WHERE b.name = 'Espresso'
   AND NOT EXISTS (SELECT 1 FROM beverage_quantity q WHERE q.beverage_id = b.id);
 
-INSERT INTO beverage_quantity (beverage_id, quantity_grams)
+INSERT INTO beverage_quantity (beverage_id, quantity)
 SELECT b.id, 300
 FROM beverage b
 WHERE b.name = 'Cappuccino'

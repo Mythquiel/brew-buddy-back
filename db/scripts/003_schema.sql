@@ -22,8 +22,8 @@ CREATE TABLE IF NOT EXISTS beverage (
 
 CREATE TABLE IF NOT EXISTS beverage_quantity (
   beverage_id UUID PRIMARY KEY REFERENCES beverage(id) ON DELETE CASCADE,
-  quantity_grams INTEGER NOT NULL DEFAULT 0,
-  CONSTRAINT chk_quantity_nonnegative CHECK (quantity_grams >= 0)
+  quantity INTEGER NOT NULL DEFAULT 0,
+  CONSTRAINT chk_quantity_nonnegative CHECK (quantity >= 0)
 );
 
 CREATE TABLE IF NOT EXISTS tag (
