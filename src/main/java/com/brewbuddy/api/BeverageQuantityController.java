@@ -1,8 +1,8 @@
 package com.brewbuddy.api;
 
+import com.brewbuddy.api.dto.BeverageQuantityCreateDto;
 import com.brewbuddy.api.dto.BeverageQuantityDto;
 import com.brewbuddy.api.dto.BeverageQuantityUpdateDto;
-import com.brewbuddy.api.dto.BeverageQunatityCreateDto;
 import com.brewbuddy.app.BeverageQuantityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +31,7 @@ public class BeverageQuantityController {
     }
 
     @PostMapping
-    public ResponseEntity<BeverageQuantityDto> create(@RequestBody BeverageQunatityCreateDto in) {
+    public ResponseEntity<BeverageQuantityDto> create(@RequestBody BeverageQuantityCreateDto in) {
         BeverageQuantityDto out = service.create(in);
         return ResponseEntity.created(
                 URI.create("/api/v1/beverageQuantity/" + out.getBeverageId())

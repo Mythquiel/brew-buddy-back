@@ -2,7 +2,7 @@ package com.brewbuddy.app;
 
 import com.brewbuddy.api.dto.BeverageQuantityDto;
 import com.brewbuddy.api.dto.BeverageQuantityUpdateDto;
-import com.brewbuddy.api.dto.BeverageQunatityCreateDto;
+import com.brewbuddy.api.dto.BeverageQuantityCreateDto;
 import com.brewbuddy.api.mapper.BeverageQuantityMapper;
 import com.brewbuddy.domain.BeverageQuantityEntity;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,7 @@ public class BeverageQuantityService {
         return beverageQuantityMapper.toDto(entity);
     }
 
-    public BeverageQuantityDto create(BeverageQunatityCreateDto dto) {
+    public BeverageQuantityDto create(BeverageQuantityCreateDto dto) {
         BeverageQuantityEntity entity = beverageQuantityMapper.toEntity(dto);
 
         BeverageQuantityEntity saved = beverageQuantityRepository.save(entity);

@@ -44,7 +44,7 @@ public class TagController {
     public ResponseEntity<TagDto> create(@RequestBody TagCreateDto in) {
         TagDto out = service.create(in);
         return ResponseEntity.created(
-                URI.create("/api/v1/Tags/" + out.getId())
+                URI.create("/api/v1/tags/" + out.getId())
         ).body(out);
     }
 

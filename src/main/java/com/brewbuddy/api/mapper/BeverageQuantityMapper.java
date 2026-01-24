@@ -2,7 +2,7 @@ package com.brewbuddy.api.mapper;
 
 import com.brewbuddy.api.dto.BeverageQuantityDto;
 import com.brewbuddy.api.dto.BeverageQuantityUpdateDto;
-import com.brewbuddy.api.dto.BeverageQunatityCreateDto;
+import com.brewbuddy.api.dto.BeverageQuantityCreateDto;
 import com.brewbuddy.domain.BeverageQuantityEntity;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
@@ -14,7 +14,7 @@ public interface BeverageQuantityMapper {
 
     BeverageQuantityDto toDto(BeverageQuantityEntity entity);
 
-    BeverageQuantityEntity toEntity(BeverageQunatityCreateDto dto);
+    BeverageQuantityEntity toEntity(BeverageQuantityCreateDto dto);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromDto(BeverageQuantityUpdateDto dto, @MappingTarget BeverageQuantityEntity entity);
