@@ -1,0 +1,71 @@
+package com.brewbuddy.app;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.Map;
+
+@Service
+@RequiredArgsConstructor
+public class SupabaseStorageService {
+
+    private final RestTemplate restTemplate = new RestTemplate();
+
+    @Value("${supabase.url}")
+    private String supabaseUrl;
+
+    @Value("${supabase.service.role.key}")
+    private String serviceRoleKey;
+
+    /**
+     * Generate a signed URL for a private image in Supabase Storage
+     * @param bucketName The storage bucket name (e.g., "beverages")
+     * @param filePath The file path within the bucket (e.g., "coffee-123.jpg")
+     * @param expiresIn Duration in seconds (default: 3600 = 1 hour)
+     * @return Signed URL that grants temporary access to the file
+     */
+    public String generateSignedUrl(String bucketName, String filePath, int expiresIn) {
+        String url = String.format("%s/storage/v1/object/sign/%s/%s",
+                supabaseUrl, bucketName, filePath);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + serviceRoleKey);
+        headers.set("Content-Type", "application/json");
+
+        Map<String, Object> requestBody = Map.of("expiresIn", expiresIn);
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+
+        ResponseEntity<Map> response = restTemplate.exchange(
+                url,
+                HttpMethod.POST,
+                request,
+                Map.class
+        );
+
+        if (response.getBody() != null && response.getBody().containsKey("signedURL")) {
+            String signedPath = (String) response.getBody().get("signedURL");
+            // Supabase returns path like "/object/sign/...", we need "/storage/v1/object/sign/..."
+            if (signedPath.startsWith("/object/")) {
+                signedPath = "/storage/v1" + signedPath;
+            }
+            String fullUrl = supabaseUrl + signedPath;
+            System.out.println("Generated signed URL: " + fullUrl);
+            return fullUrl;
+        }
+
+        throw new RuntimeException("Failed to generate signed URL");
+    }
+
+    /**
+     * Generate a signed URL with default expiration (1 hour)
+     */
+    public String generateSignedUrl(String bucketName, String filePath) {
+        return generateSignedUrl(bucketName, filePath, 3600);
+    }
+}

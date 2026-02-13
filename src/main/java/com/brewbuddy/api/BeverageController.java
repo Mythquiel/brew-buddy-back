@@ -62,4 +62,10 @@ public class BeverageController {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/{id}/image-url")
+    public ResponseEntity<String> getImageUrl(@PathVariable UUID id) {
+        String signedUrl = service.getSignedImageUrl(id);
+        return ResponseEntity.ok(signedUrl);
+    }
 }

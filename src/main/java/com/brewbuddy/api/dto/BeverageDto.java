@@ -19,6 +19,7 @@ public class BeverageDto {
     private String brand;
     private Integer brewTimeMinSec;
     private Integer brewTimeMaxSec;
+    private String imageUrl;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 }

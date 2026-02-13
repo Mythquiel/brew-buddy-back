@@ -23,6 +23,7 @@ public class BeverageService {
 
     private final BeverageRepository beverageRepository;
     private final BeverageMapper beverageMapper;
+    private final SupabaseStorageService storageService;
 
     //TODO add filters
     public Page<BeverageDto> list(String type, String nameContains, String brand, Pageable pageable) {
@@ -76,5 +77,29 @@ public class BeverageService {
         }
         beverageRepository.deleteById(id);
         log.info("Beverage deleted with id: {}", id);
+    }
+
+    public String getSignedImageUrl(UUID id) {
+        BeverageEntity entity = beverageRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Beverage not found"));
+
+        if (entity.getImageUrl() == null || entity.getImageUrl().isEmpty()) {
+            throw new IllegalStateException("Beverage has no image");
+        }
+
+        // Extract file path from stored URL or use imageUrl as path
+        // Assuming imageUrl stores just the filename or path like "beverages/coffee-123.jpg"
+        String filePath = entity.getImageUrl();
+
+        // If imageUrl contains the bucket name, extract just the path
+        if (filePath.contains("/")) {
+            String[] parts = filePath.split("/", 2);
+            if (parts.length == 2) {
+                return storageService.generateSignedUrl(parts[0], parts[1]);
+            }
+        }
+
+        // Default: assume imageUrl is just the filename in "beverage-icon" bucket
+        return storageService.generateSignedUrl("beverage-icon", filePath);
     }
 }

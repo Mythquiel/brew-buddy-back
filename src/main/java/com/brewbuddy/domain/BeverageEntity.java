@@ -56,6 +56,9 @@ public class BeverageEntity {
     @Column(name = "brew_time_max_sec")
     private Integer brewTimeMaxSec;
 
+    @Column(name = "image_url", length = 500)
+    private String imageUrl;
+
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 
