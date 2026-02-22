@@ -38,9 +38,6 @@ public class BeverageCreateDto {
     @Size(max = 500, message = "Image URL must not exceed 500 characters")
     private String imageUrl;
 
-    // Optional: IDs of existing tags to associate with this beverage
     private Set<UUID> tagIds;
-
-    // Optional: Initial quantity (creates BeverageQuantityEntity)
     private Integer initialQuantity;
 }

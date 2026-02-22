@@ -34,6 +34,5 @@ public class BeverageUpdateDto {
     @Size(max = 500, message = "Image URL must not exceed 500 characters")
     private String imageUrl;
 
-    // Optional: IDs of tags to associate with this beverage
     private Set<UUID> tagIds;
 }
