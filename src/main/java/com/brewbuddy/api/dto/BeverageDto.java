@@ -1,5 +1,6 @@
 package com.brewbuddy.api.dto;
 
+import com.brewbuddy.domain.BeverageType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +15,7 @@ import java.util.UUID;
 @Builder
 public class BeverageDto {
     private UUID id;
-    private String type;
+    private BeverageType type;
     private String name;
     private String brand;
     private Integer brewTimeMinSec;

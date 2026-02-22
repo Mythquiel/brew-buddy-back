@@ -4,6 +4,7 @@ import com.brewbuddy.api.dto.BeverageCreateDto;
 import com.brewbuddy.api.dto.BeverageDto;
 import com.brewbuddy.api.dto.BeverageUpdateDto;
 import com.brewbuddy.app.BeverageService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -45,7 +46,7 @@ public class BeverageController {
     }
 
     @PostMapping
-    public ResponseEntity<BeverageDto> create(@RequestBody BeverageCreateDto in) {
+    public ResponseEntity<BeverageDto> create(@Valid @RequestBody BeverageCreateDto in) {
         BeverageDto out = service.create(in);
         return ResponseEntity.created(
                 URI.create("/api/v1/beverages/" + out.getId())
@@ -53,7 +54,7 @@ public class BeverageController {
     }
 
     @PatchMapping("/{id}")
-    public BeverageDto update(@PathVariable UUID id, @RequestBody BeverageUpdateDto in) {
+    public BeverageDto update(@PathVariable UUID id, @Valid @RequestBody BeverageUpdateDto in) {
         return service.update(id, in);
     }
 

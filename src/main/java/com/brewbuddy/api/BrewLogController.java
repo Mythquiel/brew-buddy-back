@@ -4,6 +4,7 @@ import com.brewbuddy.api.dto.BrewLogCreateDto;
 import com.brewbuddy.api.dto.BrewLogDto;
 import com.brewbuddy.api.dto.BrewLogUpdateDto;
 import com.brewbuddy.app.BrewLogService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,9 +17,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @RestController
@@ -30,9 +33,12 @@ public class BrewLogController {
 
     @GetMapping
     public Page<BrewLogDto> list(
-            @PageableDefault(size = 20, sort = "id") Pageable pageable
+            @RequestParam(required = false) UUID beverageId,
+            @RequestParam(required = false) OffsetDateTime brewedAfter,
+            @RequestParam(required = false) OffsetDateTime brewedBefore,
+            @PageableDefault(size = 20, sort = "brewedAt") Pageable pageable
     ) {
-        return service.list(pageable);
+        return service.list(beverageId, brewedAfter, brewedBefore, pageable);
     }
 
     @GetMapping("/{id}")
@@ -41,7 +47,7 @@ public class BrewLogController {
     }
 
     @PostMapping
-    public ResponseEntity<BrewLogDto> create(@RequestBody BrewLogCreateDto in) {
+    public ResponseEntity<BrewLogDto> create(@Valid @RequestBody BrewLogCreateDto in) {
         BrewLogDto out = service.create(in);
         return ResponseEntity.created(
                 URI.create("/api/v1/brewLog/" + out.getId())
@@ -49,7 +55,7 @@ public class BrewLogController {
     }
 
     @PatchMapping("/{id}")
-    public BrewLogDto update(@PathVariable UUID id, @RequestBody BrewLogUpdateDto in) {
+    public BrewLogDto update(@PathVariable UUID id, @Valid @RequestBody BrewLogUpdateDto in) {
         return service.update(id, in);
     }
 

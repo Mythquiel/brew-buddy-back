@@ -30,6 +30,9 @@ public class TagEntity {
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
+    @Column(name = "name", nullable = false)
+    private String name;
+
     @ManyToMany(mappedBy = "tags")
     @Builder.Default
     private Set<BeverageEntity> beverages = new HashSet<>();

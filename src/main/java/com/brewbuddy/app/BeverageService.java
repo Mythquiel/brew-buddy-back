@@ -5,14 +5,18 @@ import com.brewbuddy.api.dto.BeverageDto;
 import com.brewbuddy.api.dto.BeverageUpdateDto;
 import com.brewbuddy.api.mapper.BeverageMapper;
 import com.brewbuddy.domain.BeverageEntity;
+import com.brewbuddy.domain.BeverageType;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
@@ -25,11 +29,40 @@ public class BeverageService {
     private final BeverageMapper beverageMapper;
     private final SupabaseStorageService storageService;
 
-    //TODO add filters
     public Page<BeverageDto> list(String type, String nameContains, String brand, Pageable pageable) {
         log.debug("Listing beverages with filters - type: {}, nameContains: {}, brand: {}, page: {}",
                 type, nameContains, brand, pageable);
-        Page<BeverageEntity> page = beverageRepository.findAll(pageable);
+
+        Specification<BeverageEntity> spec = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (type != null && !type.isBlank()) {
+                try {
+                    BeverageType beverageType = BeverageType.valueOf(type.toUpperCase());
+                    predicates.add(criteriaBuilder.equal(root.get("type"), beverageType));
+                } catch (IllegalArgumentException e) {
+                    log.warn("Invalid beverage type: {}", type);
+                }
+            }
+
+            if (nameContains != null && !nameContains.isBlank()) {
+                predicates.add(criteriaBuilder.like(
+                        criteriaBuilder.lower(root.get("name")),
+                        "%" + nameContains.toLowerCase() + "%"
+                ));
+            }
+
+            if (brand != null && !brand.isBlank()) {
+                predicates.add(criteriaBuilder.like(
+                        criteriaBuilder.lower(root.get("brand")),
+                        "%" + brand.toLowerCase() + "%"
+                ));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+
+        Page<BeverageEntity> page = beverageRepository.findAll(spec, pageable);
         return page.map(beverageMapper::toDto);
     }
 

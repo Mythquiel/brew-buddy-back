@@ -4,6 +4,7 @@ import com.brewbuddy.api.dto.TagCreateDto;
 import com.brewbuddy.api.dto.TagDto;
 import com.brewbuddy.api.dto.TagUpdateDto;
 import com.brewbuddy.app.TagService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
@@ -30,9 +32,10 @@ public class TagController {
 
     @GetMapping
     public Page<TagDto> list(
-            @PageableDefault(size = 20, sort = "id") Pageable pageable
+            @RequestParam(required = false) String nameContains,
+            @PageableDefault(size = 20, sort = "name") Pageable pageable
     ) {
-        return service.list(pageable);
+        return service.list(nameContains, pageable);
     }
 
     @GetMapping("/{id}")
@@ -41,7 +44,7 @@ public class TagController {
     }
 
     @PostMapping
-    public ResponseEntity<TagDto> create(@RequestBody TagCreateDto in) {
+    public ResponseEntity<TagDto> create(@Valid @RequestBody TagCreateDto in) {
         TagDto out = service.create(in);
         return ResponseEntity.created(
                 URI.create("/api/v1/tags/" + out.getId())
@@ -49,7 +52,7 @@ public class TagController {
     }
 
     @PatchMapping("/{id}")
-    public TagDto update(@PathVariable UUID id, @RequestBody TagUpdateDto in) {
+    public TagDto update(@PathVariable UUID id, @Valid @RequestBody TagUpdateDto in) {
         return service.update(id, in);
     }
 

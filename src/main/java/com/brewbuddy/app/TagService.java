@@ -5,11 +5,15 @@ import com.brewbuddy.api.dto.TagDto;
 import com.brewbuddy.api.dto.TagUpdateDto;
 import com.brewbuddy.api.mapper.TagMapper;
 import com.brewbuddy.domain.TagEntity;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
@@ -20,9 +24,21 @@ public class TagService {
     private final TagRepository tagRepository;
     private final TagMapper tagMapper;
 
-    //TODO add filters
-    public Page<TagDto> list(Pageable pageable) {
-        Page<TagEntity> page = tagRepository.findAll(pageable);
+    public Page<TagDto> list(String nameContains, Pageable pageable) {
+        Specification<TagEntity> spec = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (nameContains != null && !nameContains.isBlank()) {
+                predicates.add(criteriaBuilder.like(
+                        criteriaBuilder.lower(root.get("name")),
+                        "%" + nameContains.toLowerCase() + "%"
+                ));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+
+        Page<TagEntity> page = tagRepository.findAll(spec, pageable);
         return page.map(tagMapper::toDto);
     }
 
