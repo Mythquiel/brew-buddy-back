@@ -16,7 +16,5 @@ public class BrewLogUpdateDto {
 
     @Positive(message = "Amount used must be positive")
     private Integer amountUsed;
-
-    // Optional: Allow updating the brewed time
     private OffsetDateTime brewedAt;
 }
