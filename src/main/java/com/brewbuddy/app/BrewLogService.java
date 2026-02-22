@@ -5,11 +5,16 @@ import com.brewbuddy.api.dto.BrewLogDto;
 import com.brewbuddy.api.dto.BrewLogUpdateDto;
 import com.brewbuddy.api.mapper.BrewLogMapper;
 import com.brewbuddy.domain.BrewLogEntity;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
@@ -20,9 +25,26 @@ public class BrewLogService {
     private final BrewLogRepository brewLogRepository;
     private final BrewLogMapper brewLogMapper;
 
-    //TODO add filters
-    public Page<BrewLogDto> list(Pageable pageable) {
-        Page<BrewLogEntity> page = brewLogRepository.findAll(pageable);
+    public Page<BrewLogDto> list(UUID beverageId, OffsetDateTime brewedAfter, OffsetDateTime brewedBefore, Pageable pageable) {
+        Specification<BrewLogEntity> spec = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (beverageId != null) {
+                predicates.add(criteriaBuilder.equal(root.get("beverage").get("id"), beverageId));
+            }
+
+            if (brewedAfter != null) {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("brewedAt"), brewedAfter));
+            }
+
+            if (brewedBefore != null) {
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("brewedAt"), brewedBefore));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+
+        Page<BrewLogEntity> page = brewLogRepository.findAll(spec, pageable);
         return page.map(brewLogMapper::toDto);
     }
 

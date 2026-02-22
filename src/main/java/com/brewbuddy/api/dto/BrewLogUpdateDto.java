@@ -1,4 +1,22 @@
 package com.brewbuddy.api.dto;
 
+import jakarta.validation.constraints.Positive;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.OffsetDateTime;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class BrewLogUpdateDto {
+
+    @Positive(message = "Amount used must be positive")
+    private Integer amountUsed;
+
+    // Optional: Allow updating the brewed time
+    private OffsetDateTime brewedAt;
 }
