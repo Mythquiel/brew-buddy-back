@@ -54,7 +54,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         String allowedOrigins = System.getenv().getOrDefault("CORS_ALLOWED_ORIGINS",
-                "http://localhost:5173,http://localhost:8080","https://brew-buddy-front.vercel.app");
+                "http://localhost:5173,http://localhost:8080,https://brew-buddy-front.vercel.app");
 
         configuration.setAllowedOrigins(List.of(allowedOrigins.split(",")));
 
