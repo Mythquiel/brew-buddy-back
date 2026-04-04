@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -18,7 +19,7 @@ public class JwtService {
 
     private final SecretKey secretKey;
 
-    public JwtService(@Value("${supabase.jwt.secret}") String jwtSecret) {
+    public JwtService(@Value("${auth.jwt.secret}") String jwtSecret) {
         this.secretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
     }
 
@@ -55,6 +56,13 @@ public class JwtService {
     }
 
     /**
+     * Extracts username from JWT claims
+     */
+    public String getUsername(Claims claims) {
+        return claims.get("username", String.class);
+    }
+
+    /**
      * Extracts email from JWT claims
      */
     public String getEmail(Claims claims) {
@@ -62,10 +70,15 @@ public class JwtService {
     }
 
     /**
-     * Extracts role from JWT claims
+     * Extracts roles from JWT claims
      */
-    public String getRole(Claims claims) {
-        return claims.get("role", String.class);
+    @SuppressWarnings("unchecked")
+    public List<String> getRoles(Claims claims) {
+        Object rolesObj = claims.get("roles");
+        if (rolesObj instanceof List<?>) {
+            return (List<String>) rolesObj;
+        }
+        return List.of();
     }
 
     /**

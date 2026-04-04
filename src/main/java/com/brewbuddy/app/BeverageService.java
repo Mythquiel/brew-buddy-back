@@ -105,7 +105,7 @@ public class BeverageService {
     public void delete(UUID id) {
         log.info("Deleting beverage with id: {}", id);
         if (!beverageRepository.existsById(id)) {
-            log.warn("Beverage not found with id: {}", id);
+            log.error("Beverage not found with id: {}", id);
             throw new NoSuchElementException("Beverage not found");
         }
         beverageRepository.deleteById(id);
@@ -119,20 +119,14 @@ public class BeverageService {
         if (entity.getImageUrl() == null || entity.getImageUrl().isEmpty()) {
             throw new IllegalStateException("Beverage has no image");
         }
-
-        // Extract file path from stored URL or use imageUrl as path
-        // Assuming imageUrl stores just the filename or path like "beverages/coffee-123.jpg"
         String filePath = entity.getImageUrl();
 
-        // If imageUrl contains the bucket name, extract just the path
         if (filePath.contains("/")) {
             String[] parts = filePath.split("/", 2);
             if (parts.length == 2) {
                 return storageService.generateSignedUrl(parts[0], parts[1]);
             }
         }
-
-        // Default: assume imageUrl is just the filename in "beverage-icon" bucket
         return storageService.generateSignedUrl("beverage-icon", filePath);
     }
 }

@@ -20,4 +20,6 @@ public class BrewLogCreateDto {
 
     @Positive(message = "Amount used must be positive")
     private int amountUsed;
+
+    private UUID userId;
 }

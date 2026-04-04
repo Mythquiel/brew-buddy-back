@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -50,11 +51,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
             UUID userId = jwtService.getUserId(claims);
+            String username = jwtService.getUsername(claims);
             String email = jwtService.getEmail(claims);
-            String role = jwtService.getRole(claims);
+            List<String> roles = jwtService.getRoles(claims);
 
-            if (userId != null && email != null) {
-                UserPrincipal userPrincipal = new UserPrincipal(userId, email, role);
+            if (userId != null && username != null && email != null) {
+                UserPrincipal userPrincipal = new UserPrincipal(userId, username, email, roles);
 
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
@@ -67,7 +69,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                log.debug("Authenticated user: {} ({})", email, userId);
+                log.debug("Authenticated user: {} ({}) - {}", username, userId, email);
             }
         } catch (Exception e) {
             log.error("Error processing JWT token: {}", e.getMessage());

@@ -36,9 +36,10 @@ public class BrewLogController {
             @RequestParam(required = false) UUID beverageId,
             @RequestParam(required = false) OffsetDateTime brewedAfter,
             @RequestParam(required = false) OffsetDateTime brewedBefore,
+            @RequestParam(required = false) UUID userId,
             @PageableDefault(size = 20, sort = "brewedAt") Pageable pageable
     ) {
-        return service.list(beverageId, brewedAfter, brewedBefore, pageable);
+        return service.list(beverageId, brewedAfter, brewedBefore, userId, pageable);
     }
 
     @GetMapping("/{id}")

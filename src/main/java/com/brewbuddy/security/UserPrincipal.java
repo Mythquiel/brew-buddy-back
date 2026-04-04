@@ -15,14 +15,19 @@ import java.util.UUID;
 public class UserPrincipal implements UserDetails {
 
     private final UUID userId;
+    private final String username;
     private final String email;
-    private final String role;
+    private final List<String> roles;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // Convert Supabase role to Spring Security authority
-        String authority = role != null ? "ROLE_" + role.toUpperCase() : "ROLE_USER";
-        return List.of(new SimpleGrantedAuthority(authority));
+        // Convert auth service roles to Spring Security authorities
+        if (roles == null || roles.isEmpty()) {
+            return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+        }
+        return roles.stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()))
+                .toList();
     }
 
     @Override
@@ -33,7 +38,7 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public String getUsername() {
-        return email;
+        return username;
     }
 
     @Override

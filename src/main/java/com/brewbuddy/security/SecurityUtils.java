@@ -42,6 +42,16 @@ public class SecurityUtils {
     }
 
     /**
+     * Gets the currently authenticated user's username
+     *
+     * @return Username if authenticated, null otherwise
+     */
+    public static String getCurrentUsername() {
+        UserPrincipal user = getCurrentUser();
+        return user != null ? user.getUsername() : null;
+    }
+
+    /**
      * Gets the currently authenticated user's email
      *
      * @return User email if authenticated, null otherwise

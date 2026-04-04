@@ -46,4 +46,12 @@ public class BrewLogEntity {
 
     @Column(name = "brewed_at", nullable = false, insertable = false, updatable = false)
     private OffsetDateTime brewedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "user_id",
+            referencedColumnName = "id",
+            foreignKey = @ForeignKey(name = "fk_brew_log_user")
+    )
+    private UserEntity user;
 }

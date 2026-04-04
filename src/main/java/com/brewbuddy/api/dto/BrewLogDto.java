@@ -17,4 +17,5 @@ public class BrewLogDto {
     private UUID beverageId;
     private int amountUsed;
     private OffsetDateTime brewedAt;
+    private UUID userId;
 }

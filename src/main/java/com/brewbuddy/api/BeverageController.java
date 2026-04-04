@@ -64,7 +64,7 @@ public class BeverageController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{id}/imageUrl")
+    @GetMapping("/{id}/image-url")
     public ResponseEntity<String> getImageUrl(@PathVariable UUID id) {
         String signedUrl = service.getSignedImageUrl(id);
         return ResponseEntity.ok(signedUrl);

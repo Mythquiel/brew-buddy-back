@@ -13,7 +13,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-public class SupabaseStorageService {
+public class SupabaseStorageService implements SupabaseStorageRepository {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
@@ -50,12 +50,10 @@ public class SupabaseStorageService {
 
         if (response.getBody() != null && response.getBody().containsKey("signedURL")) {
             String signedPath = (String) response.getBody().get("signedURL");
-            // Supabase returns path like "/object/sign/...", we need "/storage/v1/object/sign/..."
             if (signedPath.startsWith("/object/")) {
                 signedPath = "/storage/v1" + signedPath;
             }
             String fullUrl = supabaseUrl + signedPath;
-            System.out.println("Generated signed URL: " + fullUrl);
             return fullUrl;
         }
 

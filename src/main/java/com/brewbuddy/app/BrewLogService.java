@@ -25,7 +25,7 @@ public class BrewLogService {
     private final BrewLogRepository brewLogRepository;
     private final BrewLogMapper brewLogMapper;
 
-    public Page<BrewLogDto> list(UUID beverageId, OffsetDateTime brewedAfter, OffsetDateTime brewedBefore, Pageable pageable) {
+    public Page<BrewLogDto> list(UUID beverageId, OffsetDateTime brewedAfter, OffsetDateTime brewedBefore, UUID userId, Pageable pageable) {
         Specification<BrewLogEntity> spec = (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -39,6 +39,10 @@ public class BrewLogService {
 
             if (brewedBefore != null) {
                 predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("brewedAt"), brewedBefore));
+            }
+
+            if (userId != null) {
+                predicates.add(criteriaBuilder.equal(root.get("userId"), userId));
             }
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
