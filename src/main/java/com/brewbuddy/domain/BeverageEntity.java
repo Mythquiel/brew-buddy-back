@@ -2,9 +2,8 @@ package com.brewbuddy.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.ForeignKey;
+import org.hibernate.annotations.Type;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -42,7 +41,8 @@ public class BeverageEntity {
     @GeneratedValue
     private UUID id;
 
-    @Enumerated(EnumType.STRING)
+    @Type(BeverageTypeEnumType.class)
+    @Column(name = "type", columnDefinition = "beverage_type")
     private BeverageType type;
 
     @Column(nullable = false)

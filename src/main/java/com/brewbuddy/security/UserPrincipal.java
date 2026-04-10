@@ -21,12 +21,16 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // Convert auth service roles to Spring Security authorities
         if (roles == null || roles.isEmpty()) {
             return List.of(new SimpleGrantedAuthority("ROLE_USER"));
         }
         return roles.stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()))
+                .map(role -> {
+                    String roleName = role.toUpperCase();
+                    return new SimpleGrantedAuthority(
+                            roleName.startsWith("ROLE_") ? roleName : "ROLE_" + roleName
+                    );
+                })
                 .toList();
     }
 

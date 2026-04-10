@@ -50,6 +50,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/beverages/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/tags/**").permitAll()
 
+                        // Public: Support form
+                        .requestMatchers(HttpMethod.POST, "/api/v1/support").permitAll()
+
                         // Admin only: Manage beverages and tags
                         .requestMatchers(HttpMethod.POST, "/api/v1/beverages/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/beverages/**").hasRole("ADMIN")
@@ -58,12 +61,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/tags/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/tags/**").hasRole("ADMIN")
 
-                        // Authenticated users: Personal brew logs, inventory, stats
                         .requestMatchers("/api/v1/brewLog/**").authenticated()
                         .requestMatchers("/api/v1/beverageQuantity/**").authenticated()
                         .requestMatchers("/api/v1/usage/**").authenticated()
-
-                        // Everything else requires authentication
+                        .requestMatchers("/api/v1/ai/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
