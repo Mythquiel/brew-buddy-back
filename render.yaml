@@ -7,6 +7,8 @@ services:
     branch: master
     dockerfilePath: ./Dockerfile
     envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
       - key: DB_URL
         sync: false
       - key: DB_USERNAME
