@@ -33,4 +33,8 @@ services:
         sync: false
       - key: SUPPORT_EMAIL
         sync: false
+      - key: SUPPORT_EMAIL_FROM
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
     healthCheckPath: /actuator/health
