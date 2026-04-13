@@ -48,16 +48,20 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                         // Public: Browse beverages and tags (read-only)
+                        .requestMatchers(HttpMethod.GET, "/api/v1/beverages").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/beverages/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/tags").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/tags/**").permitAll()
 
                         // Public: Support form
                         .requestMatchers(HttpMethod.POST, "/api/v1/support").permitAll()
 
                         // Admin only: Manage beverages and tags
+                        .requestMatchers(HttpMethod.POST, "/api/v1/beverages").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/beverages/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/beverages/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/beverages/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/tags").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/tags/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/tags/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/tags/**").hasRole("ADMIN")
