@@ -1,0 +1,1095 @@
+openapi: 3.0.3
+info:
+  title: Brew Buddy Backend API
+  version: 1.0.0
+  description: REST API for browsing beverages and tags, managing inventory, recording brew logs, submitting support requests, and using the AI assistant.
+servers:
+  - url: http://localhost:8080
+    description: Local development
+tags:
+  - name: Beverages
+  - name: Tags
+  - name: Brew Logs
+  - name: Beverage Quantity
+  - name: AI Assistant
+  - name: Support
+  - name: Actuator
+paths:
+  /actuator/health:
+    get:
+      tags:
+        - Actuator
+      summary: Health check
+      operationId: getHealth
+      responses:
+        '200':
+          description: Application health status.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+  /actuator/info:
+    get:
+      tags:
+        - Actuator
+      summary: Application info
+      operationId: getInfo
+      responses:
+        '200':
+          description: Application info.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+  /api/v1/beverages:
+    get:
+      tags:
+        - Beverages
+      summary: List beverages
+      operationId: listBeverages
+      parameters:
+        - name: type
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/BeverageType'
+        - name: nameContains
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: brand
+          in: query
+          required: false
+          schema:
+            type: string
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+        - $ref: '#/components/parameters/Sort'
+      responses:
+        '200':
+          description: Page of beverages.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeveragePage'
+    post:
+      tags:
+        - Beverages
+      summary: Create beverage
+      description: Requires a bearer token with ROLE_ADMIN.
+      operationId: createBeverage
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BeverageCreate'
+      responses:
+        '201':
+          description: Beverage created.
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri-reference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Beverage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/v1/beverages/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags:
+        - Beverages
+      summary: Get beverage
+      operationId: getBeverage
+      responses:
+        '200':
+          description: Beverage found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Beverage'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags:
+        - Beverages
+      summary: Update beverage
+      description: Requires a bearer token with ROLE_ADMIN.
+      operationId: updateBeverage
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BeverageUpdate'
+      responses:
+        '200':
+          description: Beverage updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Beverage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags:
+        - Beverages
+      summary: Delete beverage
+      description: Requires a bearer token with ROLE_ADMIN.
+      operationId: deleteBeverage
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Beverage deleted.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/v1/beverages/{id}/image-url:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags:
+        - Beverages
+      summary: Get signed beverage image URL
+      operationId: getBeverageImageUrl
+      responses:
+        '200':
+          description: Signed image URL.
+          content:
+            text/plain:
+              schema:
+                type: string
+                format: uri
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Beverage has no image.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/v1/beverages/{id}/image:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    post:
+      tags:
+        - Beverages
+      summary: Upload beverage image
+      description: Requires a bearer token with ROLE_ADMIN.
+      operationId: uploadBeverageImage
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - image
+              properties:
+                image:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Beverage image uploaded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Beverage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags:
+        - Beverages
+      summary: Delete beverage image
+      description: Requires a bearer token with ROLE_ADMIN.
+      operationId: deleteBeverageImage
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Beverage image deleted.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/v1/tags:
+    get:
+      tags:
+        - Tags
+      summary: List tags
+      operationId: listTags
+      parameters:
+        - name: nameContains
+          in: query
+          required: false
+          schema:
+            type: string
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+        - $ref: '#/components/parameters/Sort'
+      responses:
+        '200':
+          description: Page of tags.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagPage'
+    post:
+      tags:
+        - Tags
+      summary: Create tag
+      description: Requires a bearer token with ROLE_ADMIN.
+      operationId: createTag
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TagCreate'
+      responses:
+        '201':
+          description: Tag created.
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri-reference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/v1/tags/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags:
+        - Tags
+      summary: Get tag
+      operationId: getTag
+      responses:
+        '200':
+          description: Tag found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags:
+        - Tags
+      summary: Update tag
+      description: Requires a bearer token with ROLE_ADMIN.
+      operationId: updateTag
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TagUpdate'
+      responses:
+        '200':
+          description: Tag updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags:
+        - Tags
+      summary: Delete tag
+      description: Requires a bearer token with ROLE_ADMIN.
+      operationId: deleteTag
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Tag deleted.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/v1/brewLog:
+    get:
+      tags:
+        - Brew Logs
+      summary: List brew logs
+      description: Requires any authenticated bearer token.
+      operationId: listBrewLogs
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: beverageId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: brewedAfter
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: brewedBefore
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: userId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+        - $ref: '#/components/parameters/Sort'
+      responses:
+        '200':
+          description: Page of brew logs.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrewLogPage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags:
+        - Brew Logs
+      summary: Create brew log
+      description: Requires any authenticated bearer token.
+      operationId: createBrewLog
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BrewLogCreate'
+      responses:
+        '201':
+          description: Brew log created.
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri-reference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrewLog'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/v1/brewLog/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags:
+        - Brew Logs
+      summary: Get brew log
+      description: Requires any authenticated bearer token.
+      operationId: getBrewLog
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Brew log found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrewLog'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags:
+        - Brew Logs
+      summary: Update brew log
+      description: Requires any authenticated bearer token.
+      operationId: updateBrewLog
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BrewLogUpdate'
+      responses:
+        '200':
+          description: Brew log updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrewLog'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags:
+        - Brew Logs
+      summary: Delete brew log
+      description: Requires any authenticated bearer token.
+      operationId: deleteBrewLog
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Brew log deleted.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/v1/beverageQuantity:
+    post:
+      tags:
+        - Beverage Quantity
+      summary: Create beverage quantity
+      description: Requires any authenticated bearer token.
+      operationId: createBeverageQuantity
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BeverageQuantityCreate'
+      responses:
+        '201':
+          description: Beverage quantity created.
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri-reference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeverageQuantity'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/v1/beverageQuantity/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags:
+        - Beverage Quantity
+      summary: Get beverage quantity
+      description: Requires any authenticated bearer token.
+      operationId: getBeverageQuantity
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Beverage quantity found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeverageQuantity'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags:
+        - Beverage Quantity
+      summary: Update beverage quantity
+      description: Requires any authenticated bearer token.
+      operationId: updateBeverageQuantity
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BeverageQuantityUpdate'
+      responses:
+        '200':
+          description: Beverage quantity updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeverageQuantity'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags:
+        - Beverage Quantity
+      summary: Delete beverage quantity
+      description: Requires any authenticated bearer token.
+      operationId: deleteBeverageQuantity
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Beverage quantity deleted.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/v1/ai/chat:
+    post:
+      tags:
+        - AI Assistant
+      summary: Chat with AI assistant
+      description: Requires any authenticated bearer token.
+      operationId: chatWithAssistant
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatRequest'
+      responses:
+        '200':
+          description: Assistant response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/v1/support:
+    post:
+      tags:
+        - Support
+      summary: Submit support request
+      operationId: submitSupportForm
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupportForm'
+      responses:
+        '200':
+          description: Support request submitted.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - message
+                properties:
+                  message:
+                    type: string
+                    example: Support request submitted successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT signed with the configured AUTH_JWT_SECRET. Admin-only endpoints require ROLE_ADMIN.
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    Page:
+      name: page
+      in: query
+      required: false
+      description: Zero-based page index.
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+    Size:
+      name: size
+      in: query
+      required: false
+      description: Page size.
+      schema:
+        type: integer
+        minimum: 1
+        default: 20
+    Sort:
+      name: sort
+      in: query
+      required: false
+      description: Sort criteria in Spring format, for example name,asc or brewedAt,desc. May be repeated.
+      schema:
+        type: array
+        items:
+          type: string
+      style: form
+      explode: true
+  responses:
+    BadRequest:
+      description: Invalid request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Missing, invalid, or expired bearer token.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: Authenticated user does not have the required role.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    BeverageType:
+      type: string
+      enum:
+        - TEA
+        - COFFEE
+        - OTHER
+    Beverage:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          $ref: '#/components/schemas/BeverageType'
+        name:
+          type: string
+        brand:
+          type: string
+          nullable: true
+        brewTimeMinSec:
+          type: integer
+          format: int32
+          nullable: true
+        brewTimeMaxSec:
+          type: integer
+          format: int32
+          nullable: true
+        imageUrl:
+          type: string
+          maxLength: 500
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+          nullable: true
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
+    BeverageCreate:
+      type: object
+      required:
+        - type
+        - name
+      properties:
+        type:
+          $ref: '#/components/schemas/BeverageType'
+        name:
+          type: string
+          maxLength: 255
+          minLength: 1
+        brand:
+          type: string
+          maxLength: 255
+          nullable: true
+        brewTimeMinSec:
+          type: integer
+          format: int32
+          minimum: 1
+          nullable: true
+        brewTimeMaxSec:
+          type: integer
+          format: int32
+          minimum: 1
+          nullable: true
+        imageUrl:
+          type: string
+          maxLength: 500
+          nullable: true
+        tagIds:
+          type: array
+          nullable: true
+          uniqueItems: true
+          items:
+            type: string
+            format: uuid
+        initialQuantity:
+          type: integer
+          format: int32
+          nullable: true
+    BeverageUpdate:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/BeverageType'
+        name:
+          type: string
+          maxLength: 255
+          nullable: true
+        brand:
+          type: string
+          maxLength: 255
+          nullable: true
+        brewTimeMinSec:
+          type: integer
+          format: int32
+          minimum: 1
+          nullable: true
+        brewTimeMaxSec:
+          type: integer
+          format: int32
+          minimum: 1
+          nullable: true
+        imageUrl:
+          type: string
+          maxLength: 500
+          nullable: true
+        tagIds:
+          type: array
+          nullable: true
+          uniqueItems: true
+          items:
+            type: string
+            format: uuid
+    Tag:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+    TagCreate:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+    TagUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 100
+          nullable: true
+    BrewLog:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        beverageId:
+          type: string
+          format: uuid
+        amountUsed:
+          type: integer
+          format: int32
+        brewedAt:
+          type: string
+          format: date-time
+        userId:
+          type: string
+          format: uuid
+          nullable: true
+    BrewLogCreate:
+      type: object
+      required:
+        - beverageId
+        - amountUsed
+      properties:
+        beverageId:
+          type: string
+          format: uuid
+        amountUsed:
+          type: integer
+          format: int32
+          minimum: 1
+        userId:
+          type: string
+          format: uuid
+          nullable: true
+    BrewLogUpdate:
+      type: object
+      properties:
+        amountUsed:
+          type: integer
+          format: int32
+          minimum: 1
+          nullable: true
+        brewedAt:
+          type: string
+          format: date-time
+          nullable: true
+        userId:
+          type: string
+          format: uuid
+          nullable: true
+    BeverageQuantity:
+      type: object
+      properties:
+        beverageId:
+          type: string
+          format: uuid
+        quantity:
+          type: integer
+          format: int32
+    BeverageQuantityCreate:
+      type: object
+      required:
+        - beverageId
+      properties:
+        beverageId:
+          type: string
+          format: uuid
+        quantity:
+          type: integer
+          format: int32
+          minimum: 0
+          default: 0
+          nullable: true
+    BeverageQuantityUpdate:
+      type: object
+      properties:
+        quantity:
+          type: integer
+          format: int32
+          minimum: 0
+          nullable: true
+    ChatRequest:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        includeUserBeverages:
+          type: boolean
+          default: true
+          nullable: true
+    ChatResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        role:
+          type: string
+          example: assistant
+        timestamp:
+          type: string
+          format: date-time
+        contextIncluded:
+          type: boolean
+    SupportForm:
+      type: object
+      required:
+        - name
+        - email
+        - subject
+        - message
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        email:
+          type: string
+          format: email
+          minLength: 1
+        subject:
+          type: string
+          minLength: 1
+          maxLength: 200
+        message:
+          type: string
+          minLength: 1
+          maxLength: 2000
+    BeveragePage:
+      allOf:
+        - $ref: '#/components/schemas/PageMetadata'
+        - type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/Beverage'
+    TagPage:
+      allOf:
+        - $ref: '#/components/schemas/PageMetadata'
+        - type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/Tag'
+    BrewLogPage:
+      allOf:
+        - $ref: '#/components/schemas/PageMetadata'
+        - type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/BrewLog'
+    PageMetadata:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        number:
+          type: integer
+          format: int32
+        numberOfElements:
+          type: integer
+          format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
+        empty:
+          type: boolean
+        sort:
+          $ref: '#/components/schemas/Sort'
+        pageable:
+          $ref: '#/components/schemas/Pageable'
+    Pageable:
+      type: object
+      properties:
+        pageNumber:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        offset:
+          type: integer
+          format: int64
+        paged:
+          type: boolean
+        unpaged:
+          type: boolean
+        sort:
+          $ref: '#/components/schemas/Sort'
+    Sort:
+      type: object
+      properties:
+        sorted:
+          type: boolean
+        unsorted:
+          type: boolean
+        empty:
+          type: boolean
+    Error:
+      type: object
+      additionalProperties: true
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+          format: int32
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
