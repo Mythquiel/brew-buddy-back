@@ -177,21 +177,36 @@ class BeverageServiceTest {
     @DisplayName("Should delete beverage")
     void shouldDeleteBeverage() {
         // Given
-        when(beverageRepository.existsById(testId)).thenReturn(true);
+        when(beverageRepository.findById(testId)).thenReturn(Optional.of(testEntity));
 
         // When
         beverageService.delete(testId);
 
         // Then
-        verify(beverageRepository).existsById(testId);
-        verify(beverageRepository).deleteById(testId);
+        verify(beverageRepository).findById(testId);
+        verify(beverageRepository).delete(testEntity);
+    }
+
+    @Test
+    @DisplayName("Should delete stored image when deleting beverage")
+    void shouldDeleteStoredImageWhenDeletingBeverage() {
+        // Given
+        testEntity.setImageUrl("beverage-icon/test-image.png");
+        when(beverageRepository.findById(testId)).thenReturn(Optional.of(testEntity));
+
+        // When
+        beverageService.delete(testId);
+
+        // Then
+        verify(storageService).delete("beverage-icon", "test-image.png");
+        verify(beverageRepository).delete(testEntity);
     }
 
     @Test
     @DisplayName("Should throw exception when deleting non-existent beverage")
     void shouldThrowExceptionWhenDeletingNonExistentBeverage() {
         // Given
-        when(beverageRepository.existsById(testId)).thenReturn(false);
+        when(beverageRepository.findById(testId)).thenReturn(Optional.empty());
 
         // When & Then
         assertThatThrownBy(() -> beverageService.delete(testId))

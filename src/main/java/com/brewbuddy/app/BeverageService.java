@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -24,6 +25,8 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class BeverageService {
+
+    private static final String IMAGE_BUCKET = "beverage-icon";
 
     private final BeverageRepository beverageRepository;
     private final BeverageMapper beverageMapper;
@@ -104,11 +107,14 @@ public class BeverageService {
 
     public void delete(UUID id) {
         log.info("Deleting beverage with id: {}", id);
-        if (!beverageRepository.existsById(id)) {
-            log.error("Beverage not found with id: {}", id);
-            throw new NoSuchElementException("Beverage not found");
-        }
-        beverageRepository.deleteById(id);
+        BeverageEntity entity = beverageRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("Beverage not found with id: {}", id);
+                    return new NoSuchElementException("Beverage not found");
+                });
+
+        deleteStoredImage(entity.getImageUrl());
+        beverageRepository.delete(entity);
         log.info("Beverage deleted with id: {}", id);
     }
 
@@ -127,6 +133,66 @@ public class BeverageService {
                 return storageService.generateSignedUrl(parts[0], parts[1]);
             }
         }
-        return storageService.generateSignedUrl("beverage-icon", filePath);
+        return storageService.generateSignedUrl(IMAGE_BUCKET, filePath);
+    }
+
+    public BeverageDto uploadImage(UUID id, MultipartFile image) {
+        BeverageEntity entity = beverageRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Beverage not found"));
+
+        if (image == null || image.isEmpty()) {
+            throw new IllegalArgumentException("Image file is required");
+        }
+
+        String filePath = id + getImageExtension(image.getOriginalFilename(), image.getContentType());
+        String imageUrl = storageService.upload(IMAGE_BUCKET, filePath, image);
+
+        entity.setImageUrl(imageUrl);
+        entity.setUpdatedAt(OffsetDateTime.now());
+
+        return beverageMapper.toDto(beverageRepository.save(entity));
+    }
+
+    public void deleteImage(UUID id) {
+        BeverageEntity entity = beverageRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Beverage not found"));
+
+        deleteStoredImage(entity.getImageUrl());
+        entity.setImageUrl(null);
+        entity.setUpdatedAt(OffsetDateTime.now());
+        beverageRepository.save(entity);
+    }
+
+    private void deleteStoredImage(String imageUrl) {
+        if (imageUrl == null || imageUrl.isBlank()) {
+            return;
+        }
+
+        if (imageUrl.contains("/")) {
+            String[] parts = imageUrl.split("/", 2);
+            if (parts.length == 2) {
+                storageService.delete(parts[0], parts[1]);
+                return;
+            }
+        }
+
+        storageService.delete(IMAGE_BUCKET, imageUrl);
+    }
+
+    private String getImageExtension(String originalFilename, String contentType) {
+        if (originalFilename != null) {
+            int dotIndex = originalFilename.lastIndexOf('.');
+            if (dotIndex >= 0 && dotIndex < originalFilename.length() - 1) {
+                return originalFilename.substring(dotIndex).toLowerCase();
+            }
+        }
+
+        if ("image/png".equalsIgnoreCase(contentType)) {
+            return ".png";
+        }
+        if ("image/webp".equalsIgnoreCase(contentType)) {
+            return ".webp";
+        }
+        return ".jpg";
     }
 }
