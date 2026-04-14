@@ -42,7 +42,7 @@ public class BrewLogService {
             }
 
             if (userId != null) {
-                predicates.add(criteriaBuilder.equal(root.get("userId"), userId));
+                predicates.add(criteriaBuilder.equal(root.get("user").get("id"), userId));
             }
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));

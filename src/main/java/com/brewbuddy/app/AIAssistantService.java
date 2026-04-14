@@ -58,7 +58,6 @@ public class AIAssistantService {
         try {
             String context = includeContext ? buildUserContext(userId) : "";
             String fullPrompt = SYSTEM_PROMPT + context + "\n\nUser: " + userMessage + "\n\nAssistant:";
-            log.info(fullPrompt);
 
             log.debug("Sending message to Gemini API. User: {}, Context included: {}", userId, includeContext);
 
